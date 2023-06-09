@@ -31,16 +31,30 @@ async function run() {
     await client.connect();
 
     const userCollection = client.db("artxDB").collection("users");
+    const classCollection = client.db("artxDB").collection("users");
 
+    app.post("/addclass", async (req, res) => {
+      const course = req.body;
+      console.log(course);
+      //   const result = await classCollection.insertOne(course);
+      //   res.send(result);
+    });
+
+    // user save
     app.post("/users", async (req, res) => {
       const user = req.body;
       const quary = { email: user.email };
       const existUser = await userCollection.findOne(quary);
-      if (existUser){
-        return
+      if (existUser) {
+        return;
       }
       const result = await userCollection.insertOne(user);
       res.send(result);
+    });
+
+    app.get("/users", async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
     });
 
     // Send a ping to confirm a successful connection
