@@ -32,6 +32,17 @@ async function run() {
 
     const userCollection = client.db("artxDB").collection("users");
     const classCollection = client.db("artxDB").collection("classes");
+    const selectClassCollection = client
+      .db("artxDB")
+      .collection("selectClasses");
+
+    // select class
+
+    app.post("/selectclass", async (req, res) => {
+      const selectClass = req.body;
+      const result = await selectClassCollection.insertOne(selectClass);
+      res.send(result);
+    });
 
     // all classe
     app.get("/allclasses", async (req, res) => {
@@ -58,14 +69,14 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const updatrole = req.body;
-      console.log(id, update);
+      console.log(id, updatrole);
       const updateuser = {
         $set: {
           role: updatrole.role,
         },
       };
 
-      const result = await classCollection.updateOne(query, updateuser);
+      const result = await userCollection.updateOne(query, updateuser);
       res.send(result);
     });
 
