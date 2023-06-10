@@ -38,7 +38,7 @@ async function run() {
       const allclasses = await classCollection.find().toArray();
       res.send(allclasses);
     });
-
+    // update status
     app.patch("/statusclass/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -51,6 +51,21 @@ async function run() {
       };
 
       const result = await classCollection.updateOne(query, updateStatus);
+      res.send(result);
+    });
+    // update user role
+    app.patch("/updateuser/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updatrole = req.body;
+      console.log(id, update);
+      const updateuser = {
+        $set: {
+          role: updatrole.role,
+        },
+      };
+
+      const result = await classCollection.updateOne(query, updateuser);
       res.send(result);
     });
 
