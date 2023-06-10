@@ -31,13 +31,47 @@ async function run() {
     await client.connect();
 
     const userCollection = client.db("artxDB").collection("users");
-    const classCollection = client.db("artxDB").collection("users");
+    const classCollection = client.db("artxDB").collection("classes");
 
+    // all classe
+    app.get("/allclasses", async (req, res) => {
+      const allclasses = await classCollection.find().toArray();
+      res.send(allclasses);
+    });
+
+    app.patch("/statusclass/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const update = req.body;
+      console.log(id, update);
+      const updateStatus = {
+        $set: {
+          status: update.status,
+        },
+      };
+
+      const result = await classCollection.updateOne(query, updateStatus);
+      res.send(result);
+    });
+
+    //
+    app.get("/classes", async (req, res) => {
+      let quary = {};
+      if (req.query?.email) {
+        quary = { email: req.query.email };
+      } else {
+        return;
+      }
+      const result = await classCollection.find(quary).toArray();
+      res.send(result);
+    });
+
+    // save classes
     app.post("/addclass", async (req, res) => {
       const course = req.body;
       console.log(course);
-      //   const result = await classCollection.insertOne(course);
-      //   res.send(result);
+      const result = await classCollection.insertOne(course);
+      res.send(result);
     });
 
     // user save
