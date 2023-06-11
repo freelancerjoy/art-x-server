@@ -36,8 +36,36 @@ async function run() {
       .db("artxDB")
       .collection("selectClasses");
 
-    // select class
+    // Admin check route
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
 
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      if (user?.role === "admin") {
+        const result = { admin: user?.role === "admin" };
+        res.send(result);
+        return;
+      }
+      if (user?.role === "instractor") {
+        const result = { instractor: user?.role === "instractor" };
+        res.send(result);
+        return;
+      }
+    });
+
+    app.get("/selectclass", async (req, res) => {
+      let quary = {};
+      if (req.query?.email) {
+        quary = { email: req.query.email, payment: null };
+      } else {
+        return;
+      }
+      console.log(quary);
+      const result = await selectClassCollection.find(quary).toArray();
+      res.send(result);
+    });
+    // select class
     app.post("/selectclass", async (req, res) => {
       const selectClass = req.body;
       const result = await selectClassCollection.insertOne(selectClass);
