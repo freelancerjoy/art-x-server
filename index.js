@@ -36,12 +36,16 @@ async function run() {
       .db("artxDB")
       .collection("selectClasses");
 
-    // Admin check route
+    // Admin/instractor/student check route
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
-
       const query = { email: email };
       const user = await userCollection.findOne(query);
+      if (user?.role === "student") {
+        const result = { student: user?.role === "student" };
+        res.send(result);
+        return;
+      }
       if (user?.role === "admin") {
         const result = { admin: user?.role === "admin" };
         res.send(result);
