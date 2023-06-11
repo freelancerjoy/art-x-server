@@ -13,6 +13,9 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("ArtX server is Running");
 });
+app.get("/test", (req, res) => {
+  res.send("ki hoyse");
+});
 
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.PSASSWORD}@cluster0.dkc5olm.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -28,7 +31,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    client.connect();
 
     const userCollection = client.db("artxDB").collection("users");
     const classCollection = client.db("artxDB").collection("classes");
@@ -58,6 +61,14 @@ async function run() {
       }
     });
 
+    // instrator
+    app.get("/instractor", async (req, res) => {
+      const query = { role: "instractor" };
+      const result = await userCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // selected class student
     app.get("/selectclass", async (req, res) => {
       let quary = {};
       if (req.query?.email) {
