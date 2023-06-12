@@ -83,6 +83,53 @@ async function run() {
       const result = await selectClassCollection.find(quary).toArray();
       res.send(result);
     });
+    // Enrolled class by student
+    app.get("/myenrolledclass", async (req, res) => {
+      let quary = {};
+      if (req.query?.email) {
+        quary = { email: req.query.email, payment: "succesed" };
+      } else {
+        return;
+      }
+      console.log(quary);
+      const result = await selectClassCollection.find(quary).toArray();
+      res.send(result);
+    });
+
+    // update payment by student
+    app.patch("/selectclass/:id", async (req, res) => {
+      const id = req.params.id;
+      let quary = {};
+      if (req.query?.email) {
+        quary = { _id: new ObjectId(id), email: req.query.email };
+      }
+      const update = req.body;
+      console.log(id, update);
+      const updateStatus = {
+        $set: {
+          payment: update.payment,
+        },
+      };
+      const result = await selectClassCollection.updateOne(quary, updateStatus);
+      res.send(result);
+    });
+    // Available sit less
+    app.patch("/enrolled/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const update = req.body;
+      console.log(id, update);
+      const updateStatus = {
+        $set: {
+          availablesit: update.availablesit - 1,
+          enrolled: update.enrolled + 1,
+        },
+      };
+      const result = await classCollection.updateOne(query, updateStatus);
+      res.send(result);
+    });
+
     // select class
     app.post("/selectclass", async (req, res) => {
       const selectClass = req.body;
@@ -92,13 +139,22 @@ async function run() {
 
     // all classe
     app.get("/allclasses", async (req, res) => {
-      const user = req.body;
-      const quary = { email: user.email };
-      const exist = await selectClassCollection.findOne(quary);
-      if (exist) {
-        return res.send("alredy");
-      }
+      // const user = req.body;
+      // const quary = { email: user.email };
+      // const exist = await selectClassCollection.findOne(quary);
+      // if (exist) {
+      //   return res.send("alredy");
+      // }
       const allclasses = await classCollection.find().toArray();
+      res.send(allclasses);
+    });
+    // all classe
+    app.get("/popularclass", async (req, res) => {
+      const query = {};
+      const options = {
+        sort: { enrolled: -1 },
+      };
+      const allclasses = await classCollection.find(query, options).toArray();
       res.send(allclasses);
     });
     // update status
@@ -172,10 +228,11 @@ async function run() {
     // Payment intent
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
+      const totalPrice = price * 100;
       console.log(price);
       // Create a PaymentIntent with the order amount and currency
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: price,
+        amount: totalPrice,
         currency: "usd",
         automatic_payment_methods: {
           enabled: true,
