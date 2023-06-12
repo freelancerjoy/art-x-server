@@ -252,7 +252,18 @@ async function run() {
       } else {
         return;
       }
-      const result = await paymentCollection.find(quary).toArray();
+      // sort by update id
+      const result = await paymentCollection
+        .find(quary)
+        .sort({ _id: -1 })
+        .toArray((err, sortresult) => {
+          if (err) {
+            console.error("Error retrieving documents:", err);
+            return;
+          }
+          console.log("Documents:", sortresult);
+        });
+
       res.send(result);
     });
 
