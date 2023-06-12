@@ -38,6 +38,7 @@ async function run() {
 
     const userCollection = client.db("artxDB").collection("users");
     const classCollection = client.db("artxDB").collection("classes");
+    const paymentCollection = client.db("artxDB").collection("payment");
     const selectClassCollection = client
       .db("artxDB")
       .collection("selectClasses");
@@ -139,16 +140,10 @@ async function run() {
 
     // all classe
     app.get("/allclasses", async (req, res) => {
-      // const user = req.body;
-      // const quary = { email: user.email };
-      // const exist = await selectClassCollection.findOne(quary);
-      // if (exist) {
-      //   return res.send("alredy");
-      // }
       const allclasses = await classCollection.find().toArray();
       res.send(allclasses);
     });
-    // all classe
+    // Popular classe
     app.get("/popularclass", async (req, res) => {
       const query = {};
       const options = {
@@ -157,6 +152,7 @@ async function run() {
       const allclasses = await classCollection.find(query, options).toArray();
       res.send(allclasses);
     });
+
     // update status
     app.patch("/statusclass/:id", async (req, res) => {
       const id = req.params.id;
@@ -168,7 +164,6 @@ async function run() {
           status: update.status,
         },
       };
-
       const result = await classCollection.updateOne(query, updateStatus);
       res.send(result);
     });
@@ -241,6 +236,24 @@ async function run() {
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
+    });
+
+    // Payment save
+    app.post("/paymentsucces", async (req, res) => {
+      const succes = req.body;
+      const result = await paymentCollection.insertOne(succes);
+      res.send(result);
+    });
+    // Payment get
+    app.get("/paymentsucces", async (req, res) => {
+      let quary = {};
+      if (req.query?.email) {
+        quary = { email: req.query.email };
+      } else {
+        return;
+      }
+      const result = await paymentCollection.find(quary).toArray();
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
