@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const stripe = require("stripe")(
+  "sk_test_51NI12FJ2Ak22GPskC9IC2pc2gF5yJIAmAmfOd65CjNkBJT6R2vA1jtiIybeI0CZZppkO4QGBIZEgHZl7taDq4FFM008iioOH7H"
+);
 require("dotenv").config();
 
 const app = express();
@@ -89,6 +92,12 @@ async function run() {
 
     // all classe
     app.get("/allclasses", async (req, res) => {
+      const user = req.body;
+      const quary = { email: user.email };
+      const exist = await selectClassCollection.findOne(quary);
+      if (exist) {
+        return res.send("alredy");
+      }
       const allclasses = await classCollection.find().toArray();
       res.send(allclasses);
     });
@@ -158,6 +167,23 @@ async function run() {
     app.get("/users", async (req, res) => {
       const users = await userCollection.find().toArray();
       res.send(users);
+    });
+
+    // Payment intent
+    app.post("/create-payment-intent", async (req, res) => {
+      const { price } = req.body;
+      console.log(price);
+      // Create a PaymentIntent with the order amount and currency
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: price,
+        currency: "usd",
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
 
     // Send a ping to confirm a successful connection
