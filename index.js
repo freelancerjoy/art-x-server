@@ -65,10 +65,32 @@ async function run() {
       }
     });
 
+    // Admin/instractor/student check route
+    app.get("/selectclass/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email, select: "selected" };
+      const user = await selectClassCollection.findOne(query);
+
+      if (user?.role === "instractor") {
+        const result = { instractor: user?.role === "instractor" };
+        res.send(result);
+        return;
+      }
+    });
+
     // instrator
     app.get("/instractor", async (req, res) => {
       const query = { role: "instractor" };
       const result = await userCollection.find(query).toArray();
+      res.send(result);
+    });
+    // instrator
+    app.get("/popularinstractor", async (req, res) => {
+      const query = { role: "instractor" };
+      const options = {
+        sort: { enrolled: -1 },
+      };
+      const result = await userCollection.find(query, options).toArray();
       res.send(result);
     });
 
@@ -84,6 +106,15 @@ async function run() {
       const result = await selectClassCollection.find(quary).toArray();
       res.send(result);
     });
+    // delete class
+    app.delete("/deleteclass/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await selectClassCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // Enrolled class by student
     app.get("/myenrolledclass", async (req, res) => {
       let quary = {};
