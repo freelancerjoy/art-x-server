@@ -174,6 +174,20 @@ async function run() {
       const allclasses = await classCollection.find().toArray();
       res.send(allclasses);
     });
+    // update feedback classe
+    app.patch("/feedback/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const feedback = req.body;
+      console.log(id, feedback);
+      const updateFeedback = {
+        $set: {
+          feedback: feedback,
+        },
+      };
+      const result = await classCollection.updateOne(query, updateFeedback);
+      res.send(result);
+    });
     // Popular classe
     app.get("/popularclass", async (req, res) => {
       const query = {};
